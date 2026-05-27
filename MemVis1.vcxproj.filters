@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>qml;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+    </Filter>
+    <Filter Include="Source Files\SystemMonitorTypes">
+      <UniqueIdentifier>{34b5022b-290a-4866-a3d4-4252c1965217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MemoryWorker">
+      <UniqueIdentifier>{8b1d3c77-6722-4967-b05a-d384427e5dfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LeakAnalyzer">
+      <UniqueIdentifier>{75e9cd45-7819-44dd-b6d9-16e94ffb94b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ProcessTableModel">
+      <UniqueIdentifier>{ffab6186-8249-44e7-a815-5730e9041993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MemoryWatchdog">
+      <UniqueIdentifier>{c2df353a-b00f-40d1-bb44-13cbf40df5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EventLogger">
+      <UniqueIdentifier>{61388456-0bcb-4247-9047-8d97a0c84ef6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="memvis.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtUic Include="memvis.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtMoc Include="memvis.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <None Include="MemVis.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <ResourceCompile Include="MemVis.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryWorker.cpp">
+      <Filter>Source Files\MemoryWorker</Filter>
+    </ClCompile>
+    <ClCompile Include="LeakAnalyzer.cpp">
+      <Filter>Source Files\LeakAnalyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessTableModel.cpp">
+      <Filter>Source Files\ProcessTableModel</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryWatchdog.cpp">
+      <Filter>Source Files\MemoryWatchdog</Filter>
+    </ClCompile>
+    <ClCompile Include="EventLogger.cpp">
+      <Filter>Source Files\EventLogger</Filter>
+    </ClCompile>
+    <ClCompile Include="memvis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SystemMonitorTypes.h">
+      <Filter>Source Files\SystemMonitorTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="EventLogger.h">
+      <Filter>Source Files\EventLogger</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MemoryWorker.h">
+      <Filter>Source Files\MemoryWorker</Filter>
+    </QtMoc>
+    <QtMoc Include="LeakAnalyzer.h">
+      <Filter>Source Files\LeakAnalyzer</Filter>
+    </QtMoc>
+    <QtMoc Include="ProcessTableModel.h">
+      <Filter>Source Files\ProcessTableModel</Filter>
+    </QtMoc>
+    <QtMoc Include="MemoryWatchdog.h">
+      <Filter>Source Files\MemoryWatchdog</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>
