@@ -25,17 +25,16 @@
 - [ ] **Phase 3: Optimization** - 대규모 메모리 데이터 처리 성능 최적화 및 안정화
 
 ## 빌드 및 실행 방법
+
+현재 이 프로젝트는 Visual Studio 기반으로 구성되어 있습니다.
+
 1. **사전 요구 사항:**
-   * C++17 이상을 지원하는 컴파일러 (MSVC 권장)
+   * Visual Studio (C++ 데스크톱 개발 워크로드 포함)
    * Qt 6 프레임워크 설치
-   * CMake (또는 qmake)
-2. **빌드:**
+   * Visual Studio 내 **Qt Visual Studio Tools** 확장 프로그램 설치 및 Qt 6 경로(버전) 연동
+
+2. **빌드 및 실행:**
    ```bash
    # 저장소 클론
    git clone [https://github.com/ts030930/memvis.git](https://github.com/ts030930/memvis.git)
    cd memvis
-   
-   # 빌드 디렉토리 생성 및 컴파일
-   mkdir build && cd build
-   cmake ..
-   cmake --build .
