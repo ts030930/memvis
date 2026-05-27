@@ -19,6 +19,12 @@
 * **Producer:** 백그라운드에서 NT API를 지속적으로 호출하여 시스템 메모리 지표를 수집하고 버퍼에 적재합니다.
 * **Consumer:** Qt 6 메인 스레드에서 버퍼의 데이터를 가져와 UI에 시각적 요소로 렌더링하여 데이터 수집과 렌더링의 결합도를 낮췄습니다.
 
+## 핵심 알고리즘 및 상세 문서
+이 프로젝트에 적용된 세부 알고리즘 원리와 최적화 로직은 아래 문서에서 자세히 확인할 수 있습니다.
+
+* [메모리 누수 탐지 알고리즘 및 시간 복잡도 분석](docs/optimization_algorithm.md)
+* [Producer-Consumer 버퍼 동기화 전략](docs/buffer_design.md)
+
 ## 개발 로드맵
 - [x] **Phase 1: Foundation** - 프로젝트 기반 아키텍처 설계, NT API 연동 및 기본 Producer-Consumer 파이프라인 구축
 - [🏃] **Phase 2: Advanced Scanning & UI Refinement (진행 중)** - 고급 메모리 스캐닝 로직 구현 및 Qt 기반 GUI 사용자 경험 고도화
