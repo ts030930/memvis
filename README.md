@@ -32,7 +32,7 @@
 2. **빌드:**
    ```bash
    # 저장소 클론
-   git clone [https://github.com/사용자명/memvis.git](https://github.com/사용자명/memvis.git)
+   git clone [https://github.com/ts030930/memvis.git](https://github.com/ts030930/memvis.git)
    cd memvis
    
    # 빌드 디렉토리 생성 및 컴파일
