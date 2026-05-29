@@ -30,4 +30,9 @@ private:
     //  [수정됨] 내부 계산용 함수 (리턴값을 점수로)
     int calculateDangerScore(DWORD pid, const std::deque<MonitorTypes::MemoryDataPoint>& window, double& outSlope, double& outRSquared);
     void cleanUpDeadProcesses(const QList<MonitorTypes::ProcessBasicInfo>& currentList);
+
+    QHash<DWORD, std::deque<qulonglong>> m_shortHistory;
+    const size_t m_shortWindowSize = 3;                  // 3초 추적
+    const qulonglong m_spikeThreshold = 1024 * 1024;     // 1MB 스파이크 임계값 (Byte 기준)
+    QHash<DWORD, int> m_demoteCounters;
 };

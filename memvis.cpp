@@ -261,7 +261,8 @@ MemVis::MemVis(QWidget* parent)
             QMetaObject::invokeMethod(m_watchdog, "removeWhitelist", Q_ARG(QString, text));
         }
         });
-
+    ui.listWhitelist->addItem("chrome.exe");
+    ui.listWhitelist->addItem("memvis1.exe");
     // --------------------------------------------------------
     // 5. 초기 UI 상태 세팅 (수정됨)
     // --------------------------------------------------------

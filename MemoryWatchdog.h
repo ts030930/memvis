@@ -29,7 +29,8 @@ public slots:
     // Worker와 Analyzer로부터 매초마다 시스템/프로세스 상태를 전달받는 함수들
     void onSystemMemoryUpdated(const MonitorTypes::SystemMemoryInfo& sysInfo);
     void onAnalyzedDataReady(const QList<MonitorTypes::AnalyzedProcessInfo>& analyzedList);
-
+    void addWhitelist(const QString& processName);
+    void removeWhitelist(const QString& processName);
 signals:
     // UI 로그 창(textEditLog)으로 메세지를 쏘는 시그널
     void logMessage(const QString& message);
@@ -61,9 +62,13 @@ private:
     MonitorTypes::SystemMemoryInfo m_currentSysInfo;
     QDateTime m_lastLevel2Time; // Level 2 (디스크 플러시) 15분 쿨다운 체크용
 
-    // ----------------------------------------------------
-    // 4. 스래싱(Thrashing) 방어 및 화이트리스트
-    // ----------------------------------------------------
-    QMap<DWORD, QQueue<ULONG>> m_thrashingMonitor; // 각 PID별 페이지 폴트 폭증 추적
-    QSet<DWORD> m_whitelistPids;                   // 최적화 제외 대상 모음
+    // 1. 정적(글로벌) 화이트리스트: 생성자에서 chrome, 게임 등을 소문자로 등록하여 검사 생략
+    QSet<QString> m_globalWhitelist;
+
+    // 2. 동적(세션) 화이트리스트: 스래싱 검증에서 오진으로 판명된 대상 격상 보호구역
+    QSet<DWORD> m_sessionWhitelist;    // PID 기준 필터링
+    QSet<QString> m_windowsWhitelist;  // 프로세스명 기준 필터링
+
+    // 3. 스래싱 감시 맵: 트리밍(EmptyWorkingSet) 직후 3~5초간 폴트 횟수 추적용
+    QHash<DWORD, MonitorTypes::ThrashingHistory> m_thrashingWatchMap;
 };

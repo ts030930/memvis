@@ -63,7 +63,10 @@ namespace MonitorTypes {
         double slope;           // 증가 기울기
         double rSquared;        // 선형 신뢰도
     };
-
+    struct ThrashingHistory {
+        ULONG lastPageFaultCount; // 직전 틱의 누적 페이지 폴트 수
+        int elapsedSeconds;       // 트리밍 집행 후 경과된 시간 (초)
+    };
     // (기존) ntdll.dll 에서 사용할 내부 구조체
     typedef struct _SYSTEM_PROCESS_INFORMATION {
         ULONG NextEntryOffset;
