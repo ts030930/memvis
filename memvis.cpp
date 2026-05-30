@@ -17,6 +17,13 @@
 #include <QButtonGroup> 
 #include <QDateTime>
 #include <QInputDialog>
+#include <QApplication>
+#include <QStyle>
+#include <QDialogButtonBox>
+#include <QSet>
+#include <QFileIconProvider>
+#include <QFileInfo>
+
 LeakAnalyzer* m_analyzer;
 MemVis::MemVis(QWidget* parent)
     : QMainWindow(parent)
@@ -241,14 +248,87 @@ MemVis::MemVis(QWidget* parent)
     // 주의: ui.btnAdd 와 ui.btnRemove 는 Designer에 설정한 버튼 이름에 맞추세요!
     // --------------------------------------------------------
     connect(ui.btnAddWhitelist, &QPushButton::clicked, this, [this]() {
-        bool ok;
-        QString text = QInputDialog::getText(this, "보호 목록 추가",
-            "보호할 프로세스 이름 (예: chrome.exe):", QLineEdit::Normal, "", &ok);
+        QDialog dialog(this);
+        dialog.setWindowTitle("보호할 프로세스 선택");
+        dialog.resize(350, 450);
 
-        if (ok && !text.isEmpty()) {
-            if (ui.listWhitelist->findItems(text, Qt::MatchExactly).isEmpty()) {
-                ui.listWhitelist->addItem(text);
-                QMetaObject::invokeMethod(m_watchdog, "addWhitelist", Q_ARG(QString, text));
+        dialog.setStyleSheet(
+            "QDialog { background-color: #282C34; color: #ABB2BF; }"
+            "QListWidget { background-color: #2C313C; border: 1px solid #3E4451; border-radius: 6px; padding: 5px; color: #ABB2BF; }"
+            "QListWidget::item { padding: 8px; border-radius: 4px; }"
+            "QListWidget::item:hover { background-color: #3E4451; }"
+            "QListWidget::item:selected { background-color: #61AFEF; color: #23272E; font-weight: bold; }"
+            "QPushButton { background-color: #3E4451; color: white; border-radius: 4px; padding: 6px 12px; }"
+            "QPushButton:hover { background-color: #61AFEF; color: #23272E; }"
+        );
+
+        QVBoxLayout* layout = new QVBoxLayout(&dialog);
+        QLabel* label = new QLabel("현재 실행 중인 프로세스 목록에서 선택하세요:");
+        label->setStyleSheet("font-weight: bold; color: #61AFEF; margin-bottom: 5px;");
+        layout->addWidget(label);
+
+        QListWidget* listWidget = new QListWidget(&dialog);
+        listWidget->setIconSize(QSize(24, 24));
+        layout->addWidget(listWidget);
+
+        QSet<QString> uniqueNames;
+        int rowCount = m_processModel->rowCount(QModelIndex());
+        QFileIconProvider iconProvider;
+        QIcon defaultIcon = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+
+        for (int i = 0; i < rowCount; ++i) {
+            QString name = m_processModel->getNameAt(i);
+            DWORD pid = m_processModel->getPidAt(i); // 모델에서 PID 가져오기
+
+            if (!name.isEmpty() && !uniqueNames.contains(name)) {
+                uniqueNames.insert(name);
+                QIcon processIcon;
+
+                // [핵심 해결책] Windows API를 사용하여 PID로부터 프로세스의 전체 절대 경로(Full Path)를 직접 추적
+                HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+                if (hProcess) {
+                    WCHAR pathBuffer[MAX_PATH];
+                    DWORD pathSize = MAX_PATH;
+                    if (QueryFullProcessImageNameW(hProcess, 0, pathBuffer, &pathSize)) {
+                        QString fullPath = QString::fromWCharArray(pathBuffer);
+                        // 추적한 진짜 절대 경로를 넘겨서 실제 아이콘 추출
+                        processIcon = iconProvider.icon(QFileInfo(fullPath));
+                    }
+                    CloseHandle(hProcess);
+                }
+
+                // 시스템 권한 부족(보안 프로세스) 등으로 아이콘 추출에 실패한 경우만 기본 아이콘 적용
+                if (processIcon.isNull()) {
+                    processIcon = defaultIcon;
+                }
+
+                QListWidgetItem* item = new QListWidgetItem(processIcon, name);
+                listWidget->addItem(item);
+            }
+        }
+
+        listWidget->sortItems();
+
+        QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+        layout->addWidget(buttonBox);
+
+        connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(listWidget, &QListWidget::itemDoubleClicked, &dialog, &QDialog::accept);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            QListWidgetItem* selectedItem = listWidget->currentItem();
+            if (selectedItem) {
+                QString text = selectedItem->text();
+                QIcon iconFromPopup = selectedItem->icon();
+
+                if (ui.listWhitelist->findItems(text, Qt::MatchExactly).isEmpty()) {
+                    // 선택한 실제 아이콘을 메인 리스트(ui.listWhitelist)에도 똑같이 적용
+                    QListWidgetItem* mainListItem = new QListWidgetItem(iconFromPopup, text);
+                    ui.listWhitelist->addItem(mainListItem);
+
+                    QMetaObject::invokeMethod(m_watchdog, "addWhitelist", Q_ARG(QString, text));
+                }
             }
         }
         });
@@ -261,8 +341,24 @@ MemVis::MemVis(QWidget* parent)
             QMetaObject::invokeMethod(m_watchdog, "removeWhitelist", Q_ARG(QString, text));
         }
         });
-    ui.listWhitelist->addItem("chrome.exe");
-    ui.listWhitelist->addItem("memvis1.exe");
+    // --------------------------------------------------------
+// [기본 화이트리스트 항목 추가 (아이콘 포함)]
+// --------------------------------------------------------
+    QFileIconProvider startupIconProvider;
+    QIcon defaultExeIcon = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+
+    // 1. memvis1.exe (자기 자신 프로그램)의 실제 아이콘 가져오기
+    QString myAppPath = QCoreApplication::applicationFilePath(); // 내 실행파일 절대경로
+    QIcon myAppIcon = startupIconProvider.icon(QFileInfo(myAppPath));
+    if (myAppIcon.isNull()) myAppIcon = defaultExeIcon; // 혹시 실패하면 기본 아이콘
+
+    QListWidgetItem* memvisItem = new QListWidgetItem(myAppIcon, "memvis1.exe");
+    ui.listWhitelist->addItem(memvisItem);
+
+
+    // 2. chrome.exe (특정할 수 없는 경로는 기본 실행파일 아이콘 적용)
+    QListWidgetItem* chromeItem = new QListWidgetItem(defaultExeIcon, "chrome.exe");
+    ui.listWhitelist->addItem(chromeItem);
     // --------------------------------------------------------
     // 5. 초기 UI 상태 세팅 (수정됨)
     // --------------------------------------------------------
