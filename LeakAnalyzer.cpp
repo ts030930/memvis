@@ -111,7 +111,7 @@ int LeakAnalyzer::calculateDangerScore(DWORD pid, const std::deque<MonitorTypes:
     if (denominator == 0) return 0;
 
     double slope = ((N * sumTM) - (sumT * sumM)) / denominator;
-    outSlope = slope; //  참조로 값 넘겨주기
+    outSlope = slope; // 참조를 통한 외부 변수 업데이트
 
     if (slope <= 0) {
         outRSquared = 0.0;
@@ -123,35 +123,59 @@ int LeakAnalyzer::calculateDangerScore(DWORD pid, const std::deque<MonitorTypes:
     double denominatorR2 = denominator * ((N * sumM2) - (sumM * sumM));
 
     double rSquared = (denominatorR2 == 0) ? 0 : numeratorR2 / denominatorR2;
-    outRSquared = rSquared; //  참조로 값 넘겨주기
+    outRSquared = rSquared; // 참조를 통한 외부 변수 업데이트
 
     double score = 0;
 
-    // [가중치 A] 선형성 점수
-    if (rSquared > 0.7) {
-        score += weightAlpha * rSquared;
+    // ---------------------------------------------------------
+    // 🎯 [새로 적용해야 할 개선된 점수 산정 알고리즘]
+    // ---------------------------------------------------------
+
+    // 1. 선형성 점수 (최대 30점): 얼마나 꾸준히 우상향하는가?
+    if (rSquared > 0.5) {
+        score += 30.0 * rSquared;
     }
 
-    // [가중치 B] Commit Ratio 점수 
+    // 2. 누수 속도 점수 (최대 40점): 얼마나 빠르게 증가하는가?
+    // 기준: 초당 1MB(1024 KB) 누수 시 10점, 4MB 이상 누수 시 만점(40점)
+    double slopeMB = slope / 1024.0; // 초당 MB 증가량
+    double slopeScore = 0.0;
+
+    if (slopeMB >= 1.0) {
+        slopeScore = 40.0; // 1MB/s 이상은 즉시 만점 (치명적)
+    }
+    else if (slopeMB > 0.0) {
+        // 0 ~ 1.0 MB/s 구간을 0 ~ 40점에 비례 분배 (예: 0.5MB/s -> 20점)
+        slopeScore = slopeMB * 40.0;
+    }
+
+    score += slopeScore;
+
+    // 3. 은닉성 및 상태 점수 (최대 30점):
+    // 3-1. 조용한 누수인가? (은닉성 +10점)
+    ULONG deltaPageFaults = window.back().pageFaults - window.front().pageFaults;
+    double pageFaultsPerSec = (double)deltaPageFaults / N;
+    if (pageFaultsPerSec < 50.0) {
+        score += 10.0;
+    }
+
+    // 3-2. 사용하지도 않을 메모리를 쥐고만 있는가? (Commit Ratio +10점)
     const auto& lastData = window.back();
     if (lastData.workingSet > 0) {
         double commitRatio = (double)lastData.privateUsage / (double)lastData.workingSet;
         if (commitRatio >= 1.5) {
-            score += std::min(weightBeta, (commitRatio - 1.5) * 10.0);
+            score += 10.0;
         }
     }
 
-    // [가중치 C] Page Fault Rate 점수 
-    ULONG deltaPageFaults = window.back().pageFaults - window.front().pageFaults;
-    double pageFaultsPerSec = (double)deltaPageFaults / N;
-
-    if (pageFaultsPerSec < 5.0) {
-        score += weightGamma;
+    // 🚨 4. 치명적 폭주 가산점 (명백한 타겟팅)
+    // 더미 프로그램처럼 초당 5MB(5120 KB) 이상 폭증하는 프로그램은 무조건 +20점 가산
+    if (slope >= 5120.0) {
+        score += 20.0;
     }
 
     return std::min(100, (int)score);
 }
-
 void LeakAnalyzer::cleanUpDeadProcesses(const QList<MonitorTypes::ProcessBasicInfo>& currentList) {
     QSet<DWORD> currentPids;
     for (const auto& info : currentList) {

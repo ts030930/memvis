@@ -154,7 +154,7 @@
        </layout>
       </widget>
       <widget class="QWidget" name="page_3">
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>0</x>
@@ -169,7 +169,7 @@
            <property name="title">
             <string>최적화 모드 (빠른 설정)</string>
            </property>
-           <widget class="QWidget" name="">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
               <x>20</x>
@@ -182,7 +182,7 @@
              <item>
               <widget class="QRadioButton" name="btnModeStandard">
                <property name="text">
-                <string>RadioButton</string>
+                <string>스탠다드 모드</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">modeButtonGroup</string>
@@ -192,7 +192,7 @@
              <item>
               <widget class="QRadioButton" name="btnModeGaming">
                <property name="text">
-                <string>RadioButton</string>
+                <string>게이밍 모드</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">modeButtonGroup</string>
@@ -202,7 +202,7 @@
              <item>
               <widget class="QRadioButton" name="btnModeWorkstation">
                <property name="text">
-                <string>RadioButton</string>
+                <string>워크스테이션 모드</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">modeButtonGroup</string>
@@ -241,7 +241,7 @@
              </rect>
             </property>
             <property name="minimum">
-             <number>70</number>
+             <number>60</number>
             </property>
             <property name="maximum">
              <number>95</number>
@@ -269,7 +269,7 @@
              <string>자동 최적화 발동 기준: 85%</string>
             </property>
            </widget>
-           <widget class="QWidget" name="">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
               <x>830</x>
@@ -341,7 +341,7 @@
               </rect>
              </property>
             </widget>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <property name="geometry">
               <rect>
                <x>410</x>
